@@ -38,6 +38,21 @@ resource "grafana_rule_group" "this" {
       is_paused      = try(var.overrides[rule.value.alert].is_paused, null)
       no_data_state  = coalesce(try(var.overrides[rule.value.alert].no_data_state, null), "OK")
 
+      dynamic "notification_settings" {
+        for_each = var.notification_settings == null ? [] : [var.notification_settings]
+
+        content {
+          policy          = try(notification_settings.value.policy, null)
+          contact_point   = try(notification_settings.value.contact_point, null)
+          group_by        = try(notification_settings.value.group_by, null)
+          group_wait      = try(notification_settings.value.group_wait, null)
+          group_interval  = try(notification_settings.value.group_interval, null)
+          repeat_interval = try(notification_settings.value.repeat_interval, null)
+          mute_timings    = try(notification_settings.value.mute_timings, null)
+          active_timings  = try(notification_settings.value.active_timings, null)
+        }
+      }
+
       data {
         ref_id = "QUERY"
         relative_time_range {
